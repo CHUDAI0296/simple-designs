@@ -1,10 +1,16 @@
 // AI API Configuration - Claude Sonnet 4
 class AIAPIManager {
     constructor() {
-        this.apiEndpoint = 'https://api.openrouter.ai/api/v1/chat/completions'; // OpenRouter API端点
-        this.apiKey = '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'; // 请替换为OpenRouter的API密钥
-        this.model = 'anthropic/claude-sonnet-4'; // 使用的AI模型
-        this.provider = 'anthropic'; // 模型提供商
+        // 从环境变量读取配置，如果没有则使用默认值
+        this.apiEndpoint = process.env.OPENROUTER_API_ENDPOINT || 'https://api.openrouter.ai/api/v1/chat/completions';
+        this.apiKey = process.env.OPENROUTER_API_KEY || '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';
+        this.model = process.env.AI_MODEL || 'anthropic/claude-sonnet-4';
+        this.provider = 'anthropic';
+        
+        // 其他配置参数
+        this.maxTokens = parseInt(process.env.MAX_TOKENS) || 4000;
+        this.temperature = parseFloat(process.env.AI_TEMPERATURE) || 0.7;
+        this.rateLimit = parseInt(process.env.API_RATE_LIMIT) || 100;
     }
 
     // 设置API密钥
@@ -32,7 +38,7 @@ class AIAPIManager {
         
         You can respond in the same language as the user's question, but your core knowledge and technical explanations should be in English for accuracy.`;
 
-        const requestBody = {
+                const requestBody = {
             model: this.model,
             messages: [
                 {
@@ -44,12 +50,12 @@ class AIAPIManager {
                     content: context ? `${context}\n\n${message}` : message
                 }
             ],
-            max_tokens: 4000, // Claude Sonnet 4支持更长的输出
-            temperature: 0.7,
+            max_tokens: this.maxTokens,
+            temperature: this.temperature,
             stream: false,
-                    // OpenRouter specific parameters
-        route: 'fallback', // Use fallback route for availability
-        transforms: ['claude_3_5_sonnet_20241022'] // Use latest Claude model
+            // OpenRouter specific parameters
+            route: 'fallback', // Use fallback route for availability
+            transforms: ['claude_3_5_sonnet_20241022'] // Use latest Claude model
         };
 
         try {
